@@ -66,8 +66,15 @@ lon_east = np.stack((lon_east_n, lon_east_c, lon_east_s), axis=0)
 
 cajas = ['NPS', 'CPS', 'SPS']
 window = 36
-color = ['red', 'grey', 'blue']
-
+color_a = ['red', 'grey', 'blue']
+color_b = ['lightcoral', 'lightgrey', 'lightblue']
+title_a = ['a)', 'b)', 'c)']
+title_b = ['d)', 'e)', 'f)']
+ylabel_a = ['SST anomalies [$^{\circ}$C]','','']
+ylabel_b = ['Linear trend [$^{\circ}$C dec$^{-1}$]','','']
+yticks = [-.4, -.2, 0, .2, .4]
+yticklabels_a = [yticks, [], []]
+yticklabels_b = [yticks, [], []]
 nombre_figura = '/home/daniu/Documentos/figuras/figura_paper_series_NPS_CPS_SPS-evolucion_tendencias'
 
 plt.close('all')
@@ -84,7 +91,7 @@ for i in range(3):
 
     info_trend = pd.DataFrame(index=time, columns=['a', 'b', 'b_sig', 'r_sig'])
 
-    for itime in range(19,ntime):
+    for itime in range(24,ntime):
         xo = time_series_sst.to_dataframe().iloc[0:itime+1]
         xo = xo.to_numpy().squeeze()
         t = np.arange(len(xo))
@@ -100,32 +107,39 @@ for i in range(3):
     pp = np.poly1d(p)
     ajuste = pp(t)
 
-    # lets the plot begin
+#    str_fit = 'y={:.2f}$^{{\circ}}$C dec$^{{-1}} {c}$ + {:.2f}'.format(p[0]*120, p[1], c='t')
+    str_fit = 'y={:.2f}$^{{\circ}}$C/dec ${c}$ + {:.2f}'.format(p[0]*120, p[1], c='t')
+
+    # let the plot begin
     no = 0.05 + 0.3*i
-    splt_a = [no, 0.5, 0.25, 0.4]
-    splt_b = [no, 0.05, 0.25, 0.4]
+    splt_a = [no, 0.55, 0.27, 0.4]
+    splt_b = [no, 0.05, 0.27, 0.4]
 
     ax = plt.axes(splt_a)
     bx = plt.axes(splt_b)
 
-    ax.plot(time, time_series_sst.sst.values, color=color[i], label=cajas[i], lw=.5)
-    ax.plot(time, ajuste, color=color[i], lw=.5)
-    ax.legend(fontsize=6)
+    ax.plot(time, time_series_sst.sst.values, color=color_a[i], label=cajas[i], lw=.5)
+    ax.plot(time, ajuste, color=color_a[i], alpha=0.5, linestyle='--', lw=.5, label=str_fit)
+    ax.legend(fontsize=5, loc='upper left')
     ax.set_xticklabels([])
     ax.axhline(y=0, color='k', lw=0.5)
     ax.set_ylim([-.5, .5])
-    ax.set_ylabel('SST anomalies [$^{\circ}$C]', fontsize=6)
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels_a[i])
+    ax.set_ylabel(ylabel_a[i], fontsize=6)
     ax.tick_params('both', labelsize=6)
+    ax.set_title(title_a[i], loc='left', fontsize=6)
 
-    bx.plot(time, info_trend['b'], 'grey', lw=.75, alpha=.5)
+    bx.plot(time, info_trend['b'], color=color_b[i], lw=.75)
     bx.plot(time, info_trend['b_sig'], color='k', marker='*',
         markersize=1, linestyle='', markerfacecolor='k')
     bx.axhline(y=0, color='k', linewidth=0.5)
-    bx.set_ylabel('Linear trend [$^{\circ}$C dec$^{-1}$]', fontsize=6)
+    bx.set_ylabel(ylabel_b[i], fontsize=6)
     bx.set_ylim([-.5, .5])
-#    bx.set_yticks([-1,-.5,0,.5,1])
+    bx.set_yticks(yticks)
+    bx.set_yticklabels(yticklabels_b[i])
     bx.set_xlabel('Time [Years]', fontsize=6)
-#    bx.set_title('b)', fontsize=6, loc='left')
+    bx.set_title(title_b[i], loc='left', fontsize=6)
     bx.tick_params('both', labelsize=6)
 
 fig.savefig(nombre_figura, dpi=300, bbox_inches='tight')

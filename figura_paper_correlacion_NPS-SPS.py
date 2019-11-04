@@ -91,7 +91,7 @@ for itime in range(2,ntime):
     r_sig.append(c*is_sig)
 
 # I remove the first two years of r data, as it's too noisy
-r[0:18] = [i * np.nan for i in r[0:18]]
+r[0:24] = [i * np.nan for i in r[0:24]]
 
 time = time_series_sst[0].time.values
 nombre_figura = '/home/daniu/Documentos/figuras/figura_paper_correlacion_NPS_SPS'
