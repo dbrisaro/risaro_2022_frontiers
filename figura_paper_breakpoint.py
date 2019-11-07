@@ -19,7 +19,7 @@ from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from scipy.ndimage.filters import gaussian_filter
 
 # curl and wind data
-directory = '/home/daniu/Documentos/breakpoint-2008/'
+directory = '/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/breakpoint-2008/'
 meanfiles = ['sst_mean_swa_sep.nc', 'erai_mean_swa_sep.nc',
             'erai_mean_swa_sep.nc', 'ws_mean_swa_sep.nc',
             'dvor_mean_swa_sep.nc', 'erai_mean_swa_sep.nc',
@@ -51,7 +51,7 @@ lonlatbox_list = [250, 350, -60, -10]
 lon_w, lon_e, lat_s, lat_n = lonlatbox_list
 
 # load topo data
-data_bati = xr.open_dataset('/home/daniu/Documentos/batimetria/ETOPO1_Bed_g_gmt4.grd')
+data_bati = xr.open_dataset('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/batimetria/ETOPO1_Bed_g_gmt4.grd')
 data_bati = data_bati.sel(x=slice(-(360-lon_w), -(360-lon_e)), \
                     y=slice(lat_s, lat_n))
 blon = data_bati.x.values
@@ -59,7 +59,7 @@ blat = data_bati.y.values
 data_bati = data_bati.z.values
 
 # load SAF data
-saf = np.loadtxt('/home/daniu/Documentos/frentes/saf_orsi.csv', delimiter=',')
+saf = np.loadtxt('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/frentes/saf_orsi.csv', delimiter=',')
 saf_lon = saf[:,0]
 saf_lat = saf[:,1]
 ind_lon = np.where(((saf_lon >= lon_w) & (saf_lon <= lon_e)))
@@ -126,7 +126,7 @@ trend_levels2 = [np.linspace(-1.6,1.6,17), np.linspace(-1.6,1.6,17),
                 np.linspace(-30,30,13)
                 ]
 
-levels = [mean_levels, trend_levels1, trend_levels2]
+levels = [mean_levels, trend_levels2, trend_levels2]
 
 cmap_mean = [cm.cm.thermal, plt.cm.Spectral_r, plt.cm.Spectral_r,
             plt.cm.Spectral_r, plt.cm.Spectral_r, plt.cm.Spectral_r,
@@ -242,5 +242,5 @@ for i in range(len(variables)):                  # esto recorre las filas, es de
 
         cb.ax.tick_params(labelsize=fontsize)
 
-fig.savefig('/home/daniu/Documentos/figuras/fig_paper_breakpoint', dpi=300, bbox_inches='tight')
-fig.savefig('/home/daniu/Documentos/figuras/fig_paper_breakpoint' + '.pdf', bbox_inches='tight')
+fig.savefig('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/fig_paper_breakpoint', dpi=300, bbox_inches='tight')
+fig.savefig('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/fig_paper_breakpoint' + '.pdf', bbox_inches='tight')
