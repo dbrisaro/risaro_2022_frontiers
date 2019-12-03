@@ -13,7 +13,7 @@ import xarray as xr
 import os
 import matplotlib.pyplot as plt
 
-os.chdir('/home/daniu/Documentos/rutinas')
+os.chdir('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/rutinas')
 from edof_mpc_py import meanun
 
 
@@ -38,7 +38,7 @@ def sig_r(dof, r):
     d: 1 o 0. Indica si el R es significativo o no
     """
 
-    tabla = np.loadtxt('/home/daniu/Documentos/tablas/dof.txt', delimiter=',')
+    tabla = np.loadtxt('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/tablas/dof.txt', delimiter=',')
     indice = np.argmin(np.abs(tabla[:,0]-dof))
     r_corte = tabla[indice,1]
     if np.abs(r) > r_corte:
@@ -49,9 +49,9 @@ def sig_r(dof, r):
 
 #-----------------------------------
 
-archivo = '/home/daniu/Documentos/datos_reynolds/output/anom_sst_monthly_reynolds_1982-2017_swa.nc'
+archivo = '/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/datos_reynolds/output/anom_sst_monthly_reynolds_1982-2017_swa.nc'
 
-time = pd.date_range('1982-01-01', '2017-12-31', freq='MS')
+time_tot = pd.date_range('1982-01-01', '2017-12-31', freq='MS')
 data = xr.open_dataset(archivo)
 
 lat_north_n = -42.125;       lat_north_c = -47.375;           lat_north_s = -49.625;
@@ -75,7 +75,7 @@ ylabel_b = ['Linear trend [$^{\circ}$C dec$^{-1}$]','','']
 yticks = [-.4, -.2, 0, .2, .4]
 yticklabels_a = [yticks, [], []]
 yticklabels_b = [yticks, [], []]
-nombre_figura = '/home/daniu/Documentos/figuras/figura_paper_series_NPS_CPS_SPS-evolucion_tendencias'
+nombre_figura = '/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/figura_paper_series_NPS_CPS_SPS-evolucion_tendencias'
 
 plt.close('all')
 figprops = dict(figsize=(10, 3.5), dpi=72)
@@ -124,6 +124,7 @@ for i in range(3):
     ax.set_xticklabels([])
     ax.axhline(y=0, color='k', lw=0.5)
     ax.set_ylim([-.5, .5])
+    ax.set_xlim([time_tot[0], time_tot[-1]])
     ax.set_yticks(yticks)
     ax.set_yticklabels(yticklabels_a[i])
     ax.set_ylabel(ylabel_a[i], fontsize=6)
@@ -136,6 +137,7 @@ for i in range(3):
     bx.axhline(y=0, color='k', linewidth=0.5)
     bx.set_ylabel(ylabel_b[i], fontsize=6)
     bx.set_ylim([-.5, .5])
+    bx.set_xlim([time_tot[0], time_tot[-1]])
     bx.set_yticks(yticks)
     bx.set_yticklabels(yticklabels_b[i])
     bx.set_xlabel('Time [Years]', fontsize=6)

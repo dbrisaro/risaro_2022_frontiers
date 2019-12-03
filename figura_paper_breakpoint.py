@@ -19,7 +19,7 @@ from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from scipy.ndimage.filters import gaussian_filter
 
 # curl and wind data
-directory = '/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/breakpoint-2008/'
+directory = '/home/daniu/Documentos/breakpoint-2008/'
 meanfiles = ['sst_mean_swa_sep.nc', 'erai_mean_swa_sep.nc',
             'erai_mean_swa_sep.nc', 'ws_mean_swa_sep.nc',
             'dvor_mean_swa_sep.nc', 'erai_mean_swa_sep.nc',
@@ -51,7 +51,7 @@ lonlatbox_list = [250, 350, -60, -10]
 lon_w, lon_e, lat_s, lat_n = lonlatbox_list
 
 # load topo data
-data_bati = xr.open_dataset('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/batimetria/ETOPO1_Bed_g_gmt4.grd')
+data_bati = xr.open_dataset('/home/daniu/Documentos/batimetria/ETOPO1_Bed_g_gmt4.grd')
 data_bati = data_bati.sel(x=slice(-(360-lon_w), -(360-lon_e)), \
                     y=slice(lat_s, lat_n))
 blon = data_bati.x.values
@@ -59,7 +59,7 @@ blat = data_bati.y.values
 data_bati = data_bati.z.values
 
 # load SAF data
-saf = np.loadtxt('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/frentes/saf_orsi.csv', delimiter=',')
+saf = np.loadtxt('/home/daniu/Documentos/frentes/saf_orsi.csv', delimiter=',')
 saf_lon = saf[:,0]
 saf_lat = saf[:,1]
 ind_lon = np.where(((saf_lon >= lon_w) & (saf_lon <= lon_e)))
@@ -80,13 +80,13 @@ for i in range(7):
     xo = 0.13*(i+1)
 
     splt_pos = [
-                [0.05, 1-xo, 0.30, 0.1],
-                [0.37, 1-xo, 0.30, 0.1],
-                [0.67, 1-xo, 0.30, 0.1],
+                [0.05, 1-xo, 0.32, 0.1],
+                [0.37, 1-xo, 0.32, 0.1],
+                [0.67, 1-xo, 0.32, 0.1],
                 ]
 
     splt_cb_pos = [
-                [0.33, 1-xo, 0.01, 0.1],
+                [0.34, 1-xo, 0.01, 0.1],
                 [0.65, 1-xo, 0.01, 0.1],
                 [0.96, 1-xo, 0.01, 0.1],
                 ]
@@ -97,15 +97,21 @@ for i in range(7):
 
 lon_ticks = np.arange(-110, 0, 20)
 lat_ticks = np.arange(-60, 0, 10)
-title = ['a) sst','b) u-wnd','c) v-wnd','d) ws', 'e) curl', 'f) SLP', 'g) nhf']
+title_mean = ['a) SST','b) u-wnd','c) v-wnd','d) wsp', 'e) curl', 'f) SLP', 'g) nhf']
+title_trend1 = ['Linear trend 1982-2007',' ',' ',' ',' ',' ',' ']
+title_trend2 = ['Linear trend 2008-2017',' ',' ',' ',' ',' ',' ']
+
+title = [title_mean, title_trend1, title_trend2]
+titleb = [['Mean','','','', '', '', ''],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' '],
+        [' ', ' ', ' ', ' ', ' ', ' ', ' ']]
+
 fontsize = 6
 
 clevs_curl = np.linspace(-1, 1, 21)
 clevs_curl_label = np.linspace(-1.5, 1.5, 7)
 
 variables = ['sst','u10','v10','ws','svo','msl','nhf']
-
-cblabel = ['sst','u10','v10','ws','svo','msl','nhf']
 
 mean_levels = [
                 np.linspace(0,24,25), np.linspace(-6,6,13),
@@ -138,13 +144,19 @@ cmap_trend = [plt.cm.RdBu_r, plt.cm.PuOr_r, plt.cm.PuOr_r,
 
 cmap = [cmap_mean, cmap_trend, cmap_trend]
 
+variables_lab = [
+            ['$^{\circ}$C', 'm s$^{-1}$', 'm s$^{-1}$', 'm s$^{-1}$', 's$^{-1}$', 'hPa', 'W m$^{-2}$'],
+            [' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['$^{\circ}$C dec$^{-1}$', 'm s$^{-1}$ dec$^{-1}$', 'm s$^{-1}$ dec$^{-1}$', 'm s$^{-1}$ dec$^{-1}$', 's$^{-1}$ dec$^{-1}$', 'hPa dec$^{-1}$', 'W m$^{-2}$ dec$^{-1}$']
+            ]
+
+
 # figure
 plt.close('all')
 fig = plt.figure(figsize=figsize)
 plt.clf()
 
 for i in range(len(variables)):                  # esto recorre las filas, es decir las variables
-
     for j in range(3):                          # esto recore las columnas, es decir i=0 media, i=1 tend primer per, i=2 tend seg periodo
 
         # load data
@@ -196,8 +208,8 @@ for i in range(len(variables)):                  # esto recorre las filas, es de
         ax.tick_params('both', labelsize=fontsize)
         ax.set_aspect('equal', 'box')
 
-        if j==0:
-            ax.set_title(title[i], fontsize=fontsize, loc='left')
+        ax.set_title(title[j][i], fontsize=fontsize, loc='left')
+        ax.set_title(titleb[j][i], fontsize=fontsize)
 
         if variables[i] == 'svo':
             sigma = 1.5 # this depends on how noisy your data is, play with it!
@@ -220,7 +232,6 @@ for i in range(len(variables)):                  # esto recorre las filas, es de
         # ax.plot(saf_x, saf_y, color='darkblue', linestyle='-', linewidth=0.4, transform=ccrs.PlateCarree())
 
         if (variables[i]=='u10' or variables[i]=='v10' or variables[i]=='ws') and j!=0:
-
             # load u.v data
             data = xr.open_dataset(directory + meanfiles_uv[j])
             mean_u = data.u10.values.squeeze()
@@ -233,14 +244,11 @@ for i in range(len(variables)):                  # esto recorre las filas, es de
     	           scale=7e-6, headaxislength=3.5, transform=ccrs.PlateCarree(), color='k', alpha=0.6)
             ax.quiverkey(qvr, 0.75, 1.05, 5, '5 m s$^{-1}$', labelpos='E', coordinates='axes', color='k', fontproperties={'size':6})
 
-        #if j==0 or j==2:
-        cax = fig.add_axes(pos_cb[i][j])
-        cb = fig.colorbar(cvar, orientation='vertical', cax=cax)
+        if j==0 or j==2:
+            cax = fig.add_axes(pos_cb[i][j])
+            cb = fig.colorbar(cvar, orientation='vertical', cax=cax)
+            cb.ax.set_ylabel(variables_lab[j][i], fontsize=fontsize)
+            cb.ax.tick_params(labelsize=fontsize)
 
-        if j==0 or j==2:                        # only labels in first and last column
-            cb.ax.set_ylabel('var [ ]', fontsize=fontsize)
-
-        cb.ax.tick_params(labelsize=fontsize)
-
-fig.savefig('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/fig_paper_breakpoint', dpi=300, bbox_inches='tight')
-fig.savefig('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/fig_paper_breakpoint' + '.pdf', bbox_inches='tight')
+fig.savefig('/home/daniu/Documentos/figuras/fig_paper_breakpoint', dpi=300, bbox_inches='tight')
+fig.savefig('/home/daniu/Documentos/figuras/fig_paper_breakpoint' + '.pdf', bbox_inches='tight')

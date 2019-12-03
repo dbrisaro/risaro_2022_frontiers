@@ -13,7 +13,6 @@ import os
 import matplotlib.pyplot as plt
 
 os.chdir('/home/daniu/Documentos/rutinas')
-os.chdir('/home/daniu/Documentos/rutinas')
 
 #os.chdir('/media/nico/Seagate Expansion Drive/Documentos_DELL_home/rutinas/')
 from edof_mpc_py import meanun
