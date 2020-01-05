@@ -19,7 +19,7 @@ from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from scipy.ndimage.filters import gaussian_filter
 
 # curl and wind data
-directory = '/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/datos_rotor_reanalisis_CCMPv2_mensuales/'
+directory = '/home/daniu/Documentos/datos_rotor_reanalisis_CCMPv2_mensuales/'
 datasets = ['CCMPv2','ERAI','CFSR','NCEPR1']
 windfiles = '.u-v.mean.gaussiangrid.nc'
 curlfiles = '.dv.vor.gaussiangrid.nc'
@@ -29,7 +29,7 @@ lonlatbox_list = [250, 350, -60, -10]
 lon_w, lon_e, lat_s, lat_n = lonlatbox_list
 
 # load topo data
-data_bati = xr.open_dataset('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/batimetria/ETOPO1_Bed_g_gmt4.grd')
+data_bati = xr.open_dataset('/home/daniu/Documentos/batimetria/ETOPO1_Bed_g_gmt4.grd')
 data_bati = data_bati.sel(x=slice(-(360-lon_w), -(360-lon_e)), \
                     y=slice(lat_s, lat_n))
 blon = data_bati.x.values
@@ -37,7 +37,7 @@ blat = data_bati.y.values
 data_bati = data_bati.z.values
 
 # load SAF data
-saf = np.loadtxt('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/frentes/saf_orsi.csv', delimiter=',')
+saf = np.loadtxt('/home/daniu/Documentos/frentes/saf_orsi.csv', delimiter=',')
 saf_lon = saf[:,0]
 saf_lat = saf[:,1]
 ind_lon = np.where(((saf_lon >= lon_w) & (saf_lon <= lon_e)))
@@ -59,7 +59,7 @@ lon_ticks = np.arange(-110, 0, 20)
 lat_ticks = np.arange(-60, 0, 10)
 title = ['a) CCMPv2','b) ERA-Interim','c) CFSR','d) NCEPR1']
 fontsize = 6
-clevs_curl = np.linspace(-1, 1, 21)
+clevs_curl = np.linspace(-.6, .6, 13)
 clevs_curl_label = [-1, -.8, -.6, -.4, -.2, 0, .2 ,.4 ,.6, .8, 1]
 nodes = [20, 20, 10, 3]
 
@@ -91,6 +91,9 @@ for i in range(4):
     cd = (2.7/ws + .142 + ws/13.09)/1000
     rhoaire = 1.222
     matriz = ws*cd*rhoaire*mean_curl*1e7
+
+    mean_u = mean_u*ws*cd*rhoaire
+    mean_v = mean_v*ws*cd*rhoaire
 
     if i==3:
         matriz = matriz*0.9
@@ -128,7 +131,7 @@ for i in range(4):
     ax.tick_params('both', labelsize=fontsize)
     ax.set_aspect('equal', 'box')
     ax.set_title(title[i], fontsize=fontsize, loc='left')
-    ccurl = plt.contourf(lon_curl, lat_curl, matriz, clevs_curl, cmap=cmap, transform=ccrs.PlateCarree(), extend='both')
+    ccurl = plt.contourf(lon_curl, lat_curl, matriz, clevs_curl, cmap=cmap, transform=ccrs.PlateCarree(), extend='both', alpha=.8)
     cbati = plt.contour(blon, blat, data_bati, [-200], colors='gray', linewidths=.25, linestyles='solid',
         transform=ccrs.PlateCarree())
 
@@ -140,8 +143,8 @@ for i in range(4):
 
     n = nodes[i]
     qvr = ax.quiver(lon_wind[::1*n], lat_wind[::1*n], mean_u[::1*n,::1*n], mean_v[::1*n,::1*n], units='xy',
-	scale=7e-6, headaxislength=3.5, transform=ccrs.PlateCarree(), color='k', alpha=0.6)
-    ax.quiverkey(qvr, 0.75, 1.05, 5, '5 m s$^{-1}$', labelpos='E', coordinates='axes', color='k', fontproperties={'size':6})
+	headaxislength=3.5, transform=ccrs.PlateCarree(), color='k', alpha=0.6)
+    ax.quiverkey(qvr, 0.75, 1.05, .1, '0.1 N m$^{-2}$', labelpos='E', coordinates='axes', color='k', fontproperties={'size':6})
 
 
 cax = fig.add_axes([0.9, 0.07, 0.016, 0.8])
@@ -149,5 +152,5 @@ cb = fig.colorbar(ccurl, orientation='vertical', cax=cax)
 cb.ax.set_ylabel('Wind stress curl [N m$^{-2}$ km$^{-1}$ *10$^{4}$]', fontsize=fontsize)
 cb.ax.tick_params(labelsize=fontsize)
 
-fig.savefig('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/fig2paper_windstresscurl', dpi=300, bbox_inches='tight')
-fig.savefig('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/fig2paper_windstresscurl' + '.pdf', bbox_inches='tight')
+fig.savefig('/home/daniu/Documentos/figuras/fig2paper_windstresscurl', dpi=300, bbox_inches='tight')
+fig.savefig('/home/daniu/Documentos/figuras/fig2paper_windstresscurl' + '.pdf', bbox_inches='tight')

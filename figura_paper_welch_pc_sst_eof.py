@@ -95,17 +95,17 @@ for i in range(3):
     ax.set_xlim([1/192, 1/2])
 
     ax.legend(loc='upper right', fontsize=6)
-    ax.set_xlabel('freq [cycles mo$^{-1}$]', fontsize=6)
-    ax.set_ylabel('f*PSD [$^{\circ}$C$^2$]', fontsize=6)
+    ax.set_xlabel('freq [cycles per month]', fontsize=6)
+    ax.set_ylabel('Temperature variance [$^{\circ}$C$^2$]', fontsize=6)
     ax.tick_params(labelsize=6)
     ax.set_ylim([0, .6])
 
-    periods = np.array([16,8,4,2,1,0.5])
-    ticks = np.log10(1/periods)
     bx.set_xlim(ax.get_xlim())
-    bx.set_xticks(ticks)
-    bx.set_xticklabels(periods)
-    bx.set_xlabel('Period [years]', fontsize=6)
+    bx.set_xscale('log')
+    periods = np.array([.008, .009, .01, .1, .2, .3, .4, .5])
+    periods = 1/periods
+    bx.set_xticklabels([100, 50, 25, 10, 5, 2])
+    bx.set_xlabel('Period [months]', fontsize=6)
     bx.tick_params(labelsize=6)
     area = simps((Pxx)[0:6], dx=f[1]-f[0])
     print('Var tot', np.round(desvio**2,3))
@@ -115,6 +115,7 @@ for i in range(3):
     area = simps((Pxx)[5:9], dx=f[1]-f[0])
     print('Var second peak:', np.round(area,3))
     print('% second peak on total:', area/(desvio**2)*100 )
+    ax.grid(which='both', axis='x', linestyle='--', lw=.25)
 
 
 fig.savefig('/home/daniu/Documentos/figuras/' + figname + '.pdf', bbox_inches='tight')

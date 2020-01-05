@@ -13,7 +13,7 @@ import xarray as xr
 import os
 import matplotlib.pyplot as plt
 
-os.chdir('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/rutinas')
+os.chdir('/home/daniu/Documentos/rutinas')
 from edof_mpc_py import meanun
 
 
@@ -38,7 +38,7 @@ def sig_r(dof, r):
     d: 1 o 0. Indica si el R es significativo o no
     """
 
-    tabla = np.loadtxt('/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/tablas/dof.txt', delimiter=',')
+    tabla = np.loadtxt('/home/daniu/Documentos/tablas/dof.txt', delimiter=',')
     indice = np.argmin(np.abs(tabla[:,0]-dof))
     r_corte = tabla[indice,1]
     if np.abs(r) > r_corte:
@@ -49,7 +49,7 @@ def sig_r(dof, r):
 
 #-----------------------------------
 
-archivo = '/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/datos_reynolds/output/anom_sst_monthly_reynolds_1982-2017_swa.nc'
+archivo = '/home/daniu/Documentos/datos_reynolds/output/anom_sst_monthly_reynolds_1982-2017_swa.nc'
 
 time_tot = pd.date_range('1982-01-01', '2017-12-31', freq='MS')
 data = xr.open_dataset(archivo)
@@ -75,7 +75,7 @@ ylabel_b = ['Linear trend [$^{\circ}$C dec$^{-1}$]','','']
 yticks = [-.4, -.2, 0, .2, .4]
 yticklabels_a = [yticks, [], []]
 yticklabels_b = [yticks, [], []]
-nombre_figura = '/media/daniu/Seagate Expansion Drive/Documentos_DELL_home/figuras/figura_paper_series_NPS_CPS_SPS-evolucion_tendencias'
+nombre_figura = '/home/daniu/Documentos/figuras/figura_paper_series_NPS_CPS_SPS-evolucion_tendencias'
 
 plt.close('all')
 figprops = dict(figsize=(10, 3.5), dpi=72)
@@ -143,6 +143,85 @@ for i in range(3):
     bx.set_xlabel('Time [Years]', fontsize=6)
     bx.set_title(title_b[i], loc='left', fontsize=6)
     bx.tick_params('both', labelsize=6)
+
+fig.savefig(nombre_figura, dpi=300, bbox_inches='tight')
+fig.savefig(nombre_figura + '.pdf', bbox_inches='tight')
+
+
+### complementary figure
+
+
+cajas = ['NPS', 'CPS', 'SPS']
+window = 36
+color_a = ['red', 'grey', 'blue']
+color_b = ['lightcoral', 'lightgrey', 'lightblue']
+title_a = ['a)', 'b)', 'c)']
+title_b = ['d)', 'e)', 'f)']
+ylabel_a = ['SST anomalies [$^{\circ}$C]','','']
+ylabel_b = ['Linear trend [$^{\circ}$C dec$^{-1}$]','','']
+yticks = [-.6, -.4, -.2, 0, .2, .4, .6]
+yticklabels_a = [yticks, [], []]
+yticklabels_b = [yticks, [], []]
+nombre_figura = '/home/daniu/Documentos/figuras/figura_paper_series_NPS_CPS_SPS-con std'
+
+plt.close('all')
+figprops = dict(figsize=(10, 3.5), dpi=72)
+fig = plt.figure(**figprops)
+
+for i in range(3):
+    time_series_sst = data.sel(lat=slice(lat_south[i], lat_north[i]),
+                    lon=slice(lon_west[i], lon_east[i])).mean(dim=('lat','lon')).rolling(time=window,
+                    center='True').mean().dropna(dim='time',how='any')
+
+    std_sst = data.sel(lat=slice(lat_south[i], lat_north[i]),
+                    lon=slice(lon_west[i], lon_east[i])).std(dim=('lat','lon')).rolling(time=window,
+                    center='True').mean().dropna(dim='time',how='any')
+
+    err_temp = std_sst.sst.values
+    temp = time_series_sst.sst.values
+    ntime = time_series_sst.time.size
+    time = time_series_sst.time.values
+
+    info_trend = pd.DataFrame(index=time, columns=['a', 'b', 'b_sig', 'r_sig'])
+
+    for itime in range(24,ntime):
+        xo = time_series_sst.to_dataframe().iloc[0:itime+1]
+        xo = xo.to_numpy().squeeze()
+        t = np.arange(len(xo))
+        p = np.polyfit(t, xo, 1)
+        r = np.corrcoef(t, xo)[0,1]
+        degf = dof(xo)
+        is_sig = sig_r(degf, r)
+        info_trend.iloc[itime,0] = p[1]
+        info_trend.iloc[itime,1] = p[0]*120
+        info_trend.iloc[itime,2] = p[0]*120*is_sig
+        info_trend.iloc[itime,3] = r*is_sig
+
+    pp = np.poly1d(p)
+    ajuste = pp(t)
+
+#    str_fit = 'y={:.2f}$^{{\circ}}$C dec$^{{-1}} {c}$ + {:.2f}'.format(p[0]*120, p[1], c='t')
+    str_fit = 'y={:.2f}$^{{\circ}}$C/dec ${c}$ + {:.2f}'.format(p[0]*120, p[1], c='t')
+
+    # let the plot begin
+    no = 0.05 + 0.3*i
+    splt_a = [no, 0.05, 0.27, 0.5]
+
+    ax = plt.axes(splt_a)
+
+    ax.plot(time, time_series_sst.sst.values, color=color_a[i], label=cajas[i], lw=.5)
+    ax.fill_between(time, temp-err_temp, temp+err_temp, color=color_a[i], alpha=.15, edgecolor='white', lw=0)
+    ax.plot(time, ajuste, color=color_a[i], alpha=0.5, linestyle='--', lw=.5, label=str_fit)
+    ax.legend(fontsize=5, loc='upper left')
+    ax.set_xticklabels([])
+    ax.axhline(y=0, color='k', lw=0.5)
+    ax.set_ylim([-.75, .75])
+    ax.set_xlim([time_tot[0], time_tot[-1]])
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels_a[i])
+    ax.set_ylabel(ylabel_a[i], fontsize=6)
+    ax.tick_params('both', labelsize=6)
+    ax.set_title(title_a[i], loc='left', fontsize=6)
 
 fig.savefig(nombre_figura, dpi=300, bbox_inches='tight')
 fig.savefig(nombre_figura + '.pdf', bbox_inches='tight')

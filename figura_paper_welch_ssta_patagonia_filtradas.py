@@ -77,9 +77,6 @@ for i in range(3):
     f = freq[1::]
     Pxx = Pxx[1::]
 
-    periods = np.array([16,8,4,2,1,0.5])
-    ticks = np.log10(1/periods)
-
     f_n = freq_noise[1::]
     Pxx_n = Pxx_noise[1::]
     ax.semilogx(f, Pxx*f, color=color[i], label=cajas[i], lw=.5)
@@ -88,23 +85,27 @@ for i in range(3):
     ax.set_xlim([1/192, 1/2])
 
     ax.legend(loc='upper right', fontsize=6)
-    ax.set_xlabel('freq [cycles mo$^{-1}$]', fontsize=6)
-    ax.set_ylabel('f*PSD [$^{\circ}$C$^2$]', fontsize=6)
+    ax.set_xlabel('freq [cycles per month]', fontsize=6)
+    ax.set_ylabel('Temperature variance [$^{\circ}$C$^2$]', fontsize=6)
     ax.tick_params(labelsize=6)
     ax.set_ylim([0,0.035])
 
-    periods = np.array([16,8,4,2,1,0.5])
-    ticks = np.log10(1/periods)
     bx.set_xlim(ax.get_xlim())
-    bx.set_xticks(ticks)
-    bx.set_xticklabels(periods)
-    bx.set_xlabel('Period [years]', fontsize=6)
+    bx.set_xscale('log')
+    periods = np.array([.008, .009, .01, .1, .2, .3, .4, .5])
+    periods = 1/periods
+    bx.set_xticklabels([100, 50, 25, 10, 5, 2])
+    bx.set_xlabel('Period [months]', fontsize=6)
     bx.tick_params(labelsize=6)
     area = simps((Pxx)[0:6], dx=f[1]-f[0])
-    print('Var tot', np.round(desvio**2,3))
-    print('Var first peak:', np.round(area,3))
+    print('Var tot', np.round(desvio**2,4))
+    print('Var first peak:', np.round(area,4))
     print('% first peak on total:', area/(desvio**2)*100 )
+    ax.grid(which='both', axis='x', linestyle='--', lw=.25)
 
 
 fig.savefig('/home/daniu/Documentos/figuras/' + figname + '.pdf', bbox_inches='tight')
 fig.savefig('/home/daniu/Documentos/figuras/' + figname, dpi=300, bbox_inches='tight')
+
+
+ff = np.array([.0006, .0007, .0008, .0009, 0.01, .02, .03, .04, .05, .06, .07, .08, .09, .1, .2, .3, .4, .5])

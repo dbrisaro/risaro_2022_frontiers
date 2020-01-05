@@ -15,6 +15,20 @@ import sys
 sys.path.insert(0, '/home/daniu/Documentos/tesis_daniu_modulo')
 import analisis_series_temporales
 
+def ref_10m(wnd_speed, z):              # ver supplement de atlas 2011 para la parametrizacion de esta funcion
+    c0 = 3.7
+    c1 = 1.165
+    a = 0.032
+    k = 0.40
+    g = 9.81
+    zeta_cero = z * np.exp(-c0 + c1*np.log(a*k**2*wnd_speed**2/g*z))
+    wnd_speed_10m = (np.log(10/zeta_cero)/np.log(z/zeta_cero)) * wnd_speed
+
+    return wnd_speed_10m
+
+z = 4       # la boya mide a 4m
+
+
 # time vectors
 time = pd.date_range('2006-09-25','2007-03-08',freq='D')
 time_h = pd.date_range('2006-09-25','2007-03-08 23:30:00',freq='H')
@@ -37,6 +51,7 @@ time = pd.date_range('2006-09-25','2007-03-08 19:00:00',freq='6h')
 
 # remove outliers
 buoy = boya['int']
+buoy = ref_10m(boya['int'], z)
 ccmp = ccmpv2['speed']
 ccmp.index = buoy.index
 dif = buoy - ccmp
@@ -54,6 +69,7 @@ R_buoy_ccmp = np.round(np.corrcoef(x_buoy_1, y_ccmp)[0,1],2)
 
 # remove outliers
 buoy = boya['int']
+buoy = ref_10m(boya['int'], z)
 erai = era_interim['speed']
 erai.index = buoy.index
 dif = buoy - erai
@@ -69,8 +85,7 @@ slope_buoy_erai, intercept_buoy_erai = analisis_series_temporales.regresion_line
 R_buoy_erai = np.round(np.corrcoef(x_buoy_2, y_era)[0,1],2)
 
 # figure settings
-figname = '/home/daniu/Documentos/figuras/figura_paper_comparacion_boya_reanalisis'
-figname = '/home/daniu/Documentos/figuras/prueba'
+figname = '/home/daniu/Documentos/figuras/figura_paper_comparacion_boya_reanalisis_referenciada10m'
 
 fontsize = 6
 figsize = (7, 3.5)

@@ -10,6 +10,7 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import os
+from scipy import signal
 import matplotlib.pyplot as plt
 
 os.chdir('/home/daniu/Documentos/rutinas')
@@ -96,3 +97,29 @@ ssta_corr = ssta_corr.astype('float').round(2)
 export_csv = pcs_corr.to_csv(r'/home/daniu/Documentos/tablas/tabla6paper.csv', index=None, header=True)
 print(pcs_corr)
 print(ssta_corr)
+
+# -- correlacion SST en SPS, CPS y NPS con PC
+pcs_ssta_corr = pd.DataFrame(index=pcs, columns=boxes)
+for j in range(3):
+    for i in range(3):
+        jbox = boxes[j]
+        jpc = pcs[i]
+        corr = sst_df[jbox].corr(pc_df.iloc[:,i])
+        pcs_ssta_corr[jbox][jpc] = corr
+
+pcs_ssta_corr = pcs_ssta_corr.astype('float').round(2)
+print(pcs_ssta_corr)
+
+
+# -- correlacion SST en SPS, CPS y NPS con PC
+pcs_detrended_ssta_corr = pd.DataFrame(index=pcs, columns=boxes)
+for j in range(3):
+    for i in range(3):
+        jbox = boxes[j]
+        jpc = pcs[i]
+        jsst = pd.Series(signal.detrend(sst_df[jbox]), index=time_c)
+        corr = jsst.corr(pc_df.iloc[:,i])
+        pcs_detrended_ssta_corr[jbox][jpc] = corr
+
+pcs_detrended_ssta_corr = pcs_detrended_ssta_corr.astype('float').round(2)
+print(pcs_detrended_ssta_corr)

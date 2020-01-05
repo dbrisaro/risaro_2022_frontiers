@@ -3,7 +3,7 @@ En esta rutina hago la Figura 8 o 9 del paper,
 con las tendencias de u, v, int, curl, msl y hf
 para distintos periodos
 Dani Risaro
-Octubre 2019
+Enero 2020
 """
 
 import warnings
@@ -81,7 +81,7 @@ for i in range(7):
 
     splt_pos = [
                 [0.05, 1-xo, 0.32, 0.1],
-                [0.37, 1-xo, 0.32, 0.1],
+                [0.41, 1-xo, 0.32, 0.1],
                 [0.67, 1-xo, 0.32, 0.1],
                 ]
 
@@ -106,7 +106,7 @@ titleb = [['Mean','','','', '', '', ''],
         [' ', ' ', ' ', ' ', ' ', ' ', ' '],
         [' ', ' ', ' ', ' ', ' ', ' ', ' ']]
 
-fontsize = 6
+fontsize = 7
 
 clevs_curl = np.linspace(-1, 1, 21)
 clevs_curl_label = np.linspace(-1.5, 1.5, 7)
@@ -134,15 +134,23 @@ trend_levels2 = [np.linspace(-1.6,1.6,17), np.linspace(-1.6,1.6,17),
 
 levels = [mean_levels, trend_levels2, trend_levels2]
 
-cmap_mean = [cm.cm.thermal, plt.cm.Spectral_r, plt.cm.Spectral_r,
-            plt.cm.Spectral_r, plt.cm.Spectral_r, plt.cm.Spectral_r,
-            plt.cm.Spectral_r]
+
+cmap_mean = [cm.cm.thermal, cm.cm.tarn_r, cm.cm.tarn_r,
+            cm.cm.tarn_r, cm.cm.tarn_r, cm.cm.tarn_r,
+            cm.cm.tarn_r]
 
 cmap_trend = [plt.cm.RdBu_r, plt.cm.PuOr_r, plt.cm.PuOr_r,
             plt.cm.PuOr_r, plt.cm.PuOr_r, plt.cm.PuOr_r,
             plt.cm.PuOr_r]
 
 cmap = [cmap_mean, cmap_trend, cmap_trend]
+
+
+umbral_mean = [0]*7
+umbral_trend1 = [0.1, 0.125, 0.15, 0.2, 0.0000001, 30, 5]
+umbral_trend2 = [0.2, 0.2, 0.2, 0.2, 0, 30, 5]
+
+umbral = [umbral_mean, umbral_trend1, umbral_trend2]
 
 variables_lab = [
             ['$^{\circ}$C', 'm s$^{-1}$', 'm s$^{-1}$', 'm s$^{-1}$', 's$^{-1}$', 'hPa', 'W m$^{-2}$'],
@@ -158,7 +166,7 @@ plt.clf()
 
 for i in range(len(variables)):                  # esto recorre las filas, es decir las variables
     for j in range(3):                          # esto recore las columnas, es decir i=0 media, i=1 tend primer per, i=2 tend seg periodo
-
+        print(i,j)
         # load data
         if j==0:
             data = xr.open_dataset(directory + files[j][i])
@@ -172,26 +180,21 @@ for i in range(len(variables)):                  # esto recorre las filas, es de
             lon = data.longitude.values
             lat = data.latitude.values
 
+        data_var[np.abs(data_var)<umbral[j][i]] = np.nan
+
         ax = plt.axes(pos[i][j], projection=ccrs.Mercator())
         ax.set_extent(lonlatbox_list, crs=ccrs.PlateCarree())
         ax.coastlines(resolution='50m', color='black', linewidths=0.2, zorder=5)
         ax.add_feature(ccrs.cartopy.feature.LAND, edgecolor='k', color='white', zorder=4)
 
-        if j==0 and i<len(variables)-1:         # only ylabels
-            ax.set_xticks(lon_ticks, crs=ccrs.PlateCarree())
-            ax.set_yticks(lat_ticks, crs=ccrs.PlateCarree())
-            ax.set_xticklabels([])
-            lat_formatter = LatitudeFormatter()
-            ax.yaxis.set_major_formatter(lat_formatter)
-
-        elif j>0 and i==len(variables)-1:         # only xlabels
+        if j==2:         # only xlabels
             ax.set_xticks(lon_ticks, crs=ccrs.PlateCarree())
             ax.set_yticks(lat_ticks, crs=ccrs.PlateCarree())
             ax.set_yticklabels([])
             lon_formatter = LongitudeFormatter(zero_direction_label=True)
             ax.xaxis.set_major_formatter(lon_formatter)
 
-        elif j==0 and i==len(variables)-1:         # xlabels and ylabels
+        else:                                 # xlabels and ylabels
             ax.set_xticks(lon_ticks, crs=ccrs.PlateCarree())
             ax.set_yticks(lat_ticks, crs=ccrs.PlateCarree())
             lon_formatter = LongitudeFormatter(zero_direction_label=True)
@@ -199,16 +202,16 @@ for i in range(len(variables)):                  # esto recorre las filas, es de
             ax.xaxis.set_major_formatter(lon_formatter)
             ax.yaxis.set_major_formatter(lat_formatter)
 
-        else:
-            ax.set_xticks(lon_ticks, crs=ccrs.PlateCarree())
-            ax.set_yticks(lat_ticks, crs=ccrs.PlateCarree())
-            ax.set_yticklabels([])
-            ax.set_xticklabels([])
+        # else:
+        #     ax.set_xticks(lon_ticks, crs=ccrs.PlateCarree())
+        #     ax.set_yticks(lat_ticks, crs=ccrs.PlateCarree())
+        #     ax.set_yticklabels([])
+        #     ax.set_xticklabels([])
 
         ax.tick_params('both', labelsize=fontsize)
         ax.set_aspect('equal', 'box')
 
-        ax.set_title(title[j][i], fontsize=fontsize, loc='left')
+        ax.set_title(title[j][i], fontsize=fontsize, loc='left', fontweight='bold')
         ax.set_title(titleb[j][i], fontsize=fontsize)
 
         if variables[i] == 'svo':
@@ -252,3 +255,16 @@ for i in range(len(variables)):                  # esto recorre las filas, es de
 
 fig.savefig('/home/daniu/Documentos/figuras/fig_paper_breakpoint', dpi=300, bbox_inches='tight')
 fig.savefig('/home/daniu/Documentos/figuras/fig_paper_breakpoint' + '.pdf', bbox_inches='tight')
+
+## chequeamos si los vientos v son anomalos
+i=2
+j=0
+data = xr.open_dataset(directory + files[j][i])
+data_mean = data[variables[i]].values.squeeze()
+
+i=2
+j=2
+data = xr.open_dataset(directory + files[j][i])
+data_cambio = data[variables[i]].values.squeeze()*120*(102/10)
+
+#plt.imshow(data_mean+data_cambio, cmap=plt.cm.RdBu_r), plt.colorbar(), plt.show()

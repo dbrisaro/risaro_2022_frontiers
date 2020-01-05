@@ -6,14 +6,14 @@ Dani Risaro
 Noviembre 2019
 """
 
+import warnings
+warnings.filterwarnings('ignore')
 import numpy as np
 import pandas as pd
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
-import warnings
 import xarray as xr
 from eofs.standard import Eof
-warnings.filterwarnings('ignore')
 import cartopy.feature as cfeature
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 
@@ -81,9 +81,9 @@ clevs_label_sst = np.linspace(-.3, .3, 7)
 cmap = plt.cm.RdBu_r
 
 cbar_label_sst = 'SST anomalies [$^{\circ}$C]'
-title = ['a) EOF 1 (var={0:.0f}%)'.format(varfrac_sst[0]*100),\
-            'b) EOF 2 (var={0:.0f}%)'.format(varfrac_sst[1]*100),\
-            'c) EOF 3 (var={0:.0f}%)'.format(varfrac_sst[2]*100)]
+title = ['a) EOF 1 SSTa (var={0:.0f}%)'.format(varfrac_sst[0]*100),\
+            'b) EOF 2 SSTa (var={0:.0f}%)'.format(varfrac_sst[1]*100),\
+            'c) EOF 3 SSTa (var={0:.0f}%)'.format(varfrac_sst[2]*100)]
 
 fontsize = 6
 figsize = (7, 7)
